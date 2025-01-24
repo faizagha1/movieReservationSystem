@@ -3,6 +3,8 @@ package com.movieReservationSystem.UserAndAuth.Services;
 import java.util.Arrays;
 import java.util.HashSet;
 
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -60,8 +62,25 @@ public class UserService {
         }
     }
 
-    public AuthResponse promoteUser(String userId) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'promoteUser'");
+    public AuthResponse promoteUser(Long userId) {
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new NoUserFound("User not found"));
+        user.getRole().add(Role.ADMIN);
+        userRepository.save(user);
+        return AuthResponse.builder()
+                .message("User promoted to admin")
+                .build();
+    }
+
+    public UserEntity getCurrentUser() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if (principal instanceof UserDetails) {
+            String username = ((UserDetails) principal).getUsername();
+            return userRepository.findByusername(username)
+                    .orElseThrow(() -> new NoUserFound("No user found with username: " + username));
+        } else {
+            throw new NoUserFound("User not authenticated");
+        }
     }
 }

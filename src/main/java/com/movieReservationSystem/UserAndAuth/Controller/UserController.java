@@ -1,6 +1,8 @@
 package com.movieReservationSystem.UserAndAuth.Controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -9,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.movieReservationSystem.UserAndAuth.Dtos.AuthResponse;
 import com.movieReservationSystem.UserAndAuth.Dtos.LoginRequest;
 import com.movieReservationSystem.UserAndAuth.Dtos.SignupRequest;
+import com.movieReservationSystem.UserAndAuth.Entity.UserEntity;
 import com.movieReservationSystem.UserAndAuth.Services.UserService;
 
 import jakarta.validation.Valid;
@@ -36,8 +39,14 @@ public class UserController {
 
     @PostMapping("/promote/{userId}")
     public ResponseEntity<?> promoteUser(
-            @Valid @RequestBody String userId) {
+            @PathVariable Long userId) {
         AuthResponse authResponse = userService.promoteUser(userId);
         return ResponseEntity.ok(authResponse);
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<?> getCurrentUser() {
+        UserEntity currentUser = userService.getCurrentUser();
+        return ResponseEntity.ok(currentUser);
     }
 }
