@@ -1,0 +1,30 @@
+
+services:
+  mysql:
+    image: mysql:latest
+    container_name: mysql-container
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword  # Replace with a secure root password
+      MYSQL_DATABASE: my_database       # Optional: Pre-create a database
+      MYSQL_USER: myuser                # Optional: Create a custom user
+      MYSQL_PASSWORD: mypassword        # Optional: Password for the custom user
+    ports:
+      - "3306:3306"  # Expose MySQL on port 3306
+    volumes:
+      - mysql_data:/var/lib/mysql  # Persistent storage for MySQL data
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: phpmyadmin-container
+    restart: always
+    environment:
+      PMA_HOST: mysql  # Link to the MySQL service
+      PMA_PORT: 3306   # MySQL port
+    ports:
+      - "8080:80"  # Access phpMyAdmin via localhost:8080
+    depends_on:
+      - mysql
+
+volumes:
+  mysql_data:
