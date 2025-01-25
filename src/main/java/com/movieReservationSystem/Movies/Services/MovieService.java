@@ -1,5 +1,6 @@
 package com.movieReservationSystem.Movies.Services;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,6 +12,7 @@ import com.movieReservationSystem.Movies.Dtos.Request.ShowTimeRequest;
 import com.movieReservationSystem.Movies.Dtos.Response.MovieAdded;
 import com.movieReservationSystem.Movies.Dtos.Response.MovieDeleted;
 import com.movieReservationSystem.Movies.Dtos.Response.MovieUpdated;
+import com.movieReservationSystem.Movies.Dtos.Response.MoviesAndShowTImes;
 import com.movieReservationSystem.Movies.Dtos.Response.ShowTimeResponse;
 import com.movieReservationSystem.Movies.Entities.MovieEntity;
 import com.movieReservationSystem.Movies.Entities.ShowTimeEntity;
@@ -144,5 +146,41 @@ public class MovieService {
                                                 + showTime.getDate() + " from " + showTime.getStartTime() + " to "
                                                 + showTime.getEndTime())
                                 .build();
+        }
+
+        public List<MoviesAndShowTImes> getAllMovies(LocalDate date) {
+                List<ShowTimeEntity> showTime = showTimeRepository.findByDate(date);
+                List<MoviesAndShowTImes> moviesAndShowTImes = showTime.stream().map(showTimeEntity -> {
+                        MovieEntity movie = showTimeEntity.getMovie();
+                        return MoviesAndShowTImes.builder()
+                                        .title(movie.getTitle())
+                                        .description(movie.getDescription())
+                                        .posterImage(movie.getPosterImage())
+                                        .genre(movie.getGenres())
+                                        .startingTime(showTimeEntity.getStartTime())
+                                        .endingTime(showTimeEntity.getEndTime())
+                                        .build();
+                }).toList();
+                return moviesAndShowTImes;
+        }
+
+        public List<ShowTimeResponse> getAllShowtimes(Long movieId) throws MovieNotFound {
+                MovieEntity movie = movieRepository.findById(movieId)
+                                .orElseThrow(() -> new MovieNotFound("Movie with id " + movieId + " not found"));
+                List<ShowTimeEntity> showTimes = showTimeRepository
+                                .findByMovie(movie);
+                List<ShowTimeResponse> showTimeResponses = showTimes.stream().map(showTime -> {
+                        return ShowTimeResponse.builder()
+                                        .date(showTime.getDate())
+                                        .startTime(showTime.getStartTime())
+                                        .endTime(showTime.getEndTime())
+                                        .movieName(movie.getTitle())
+                                        .message("Showtime for movie titled '" + movie.getTitle() + "' on "
+                                                        + showTime.getDate() + " from " + showTime.getStartTime()
+                                                        + " to "
+                                                        + showTime.getEndTime())
+                                        .build();
+                }).toList();
+                return showTimeResponses;
         }
 }

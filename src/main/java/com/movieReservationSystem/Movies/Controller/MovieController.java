@@ -1,5 +1,7 @@
 package com.movieReservationSystem.Movies.Controller;
 
+import java.time.LocalDate;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -7,6 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.movieReservationSystem.Movies.Dtos.Request.MovieAddRequest;
@@ -49,6 +52,11 @@ public class MovieController {
         return ResponseEntity.ok(movieUpdated);
     }
 
+    @GetMapping("/all/{movieId}")
+    public ResponseEntity<?> getAllShowtimes(@PathVariable Long movieId) throws MovieNotFound {
+        return ResponseEntity.ok(movieService.getAllShowtimes(movieId));
+    }
+
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/showtimes/{movieId}")
     public ResponseEntity<?> addShowtime(@PathVariable Long movieId, @RequestBody ShowTimeRequest request)
@@ -58,6 +66,13 @@ public class MovieController {
 
     @GetMapping("/showtimes/{movieId}")
     public ResponseEntity<?> getShowtimes(@PathVariable Long movieId) throws MovieNotFound {
-        return ResponseEntity.ok(movieService.getShowtimes(movieId));
+        return ResponseEntity.ok(movieService.getAllShowtimes(movieId));
     }
+
+    @GetMapping("/all")
+    public ResponseEntity<?> getAllMovies(@RequestParam("date") String date) {
+        LocalDate localDate = LocalDate.parse(date);
+        return ResponseEntity.ok(movieService.getAllMovies(localDate));
+    }
+
 }
