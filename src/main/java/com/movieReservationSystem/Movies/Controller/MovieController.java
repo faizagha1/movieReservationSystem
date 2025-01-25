@@ -2,6 +2,7 @@ package com.movieReservationSystem.Movies.Controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.movieReservationSystem.Movies.Dtos.Request.MovieAddRequest;
 import com.movieReservationSystem.Movies.Dtos.Request.MovieUpdateRequest;
+import com.movieReservationSystem.Movies.Dtos.Request.ShowTimeRequest;
 import com.movieReservationSystem.Movies.Dtos.Response.MovieAdded;
 import com.movieReservationSystem.Movies.Dtos.Response.MovieDeleted;
 import com.movieReservationSystem.Movies.Dtos.Response.MovieUpdated;
@@ -45,5 +47,17 @@ public class MovieController {
             @PathVariable Long movieId) throws MovieNotFound {
         MovieUpdated movieUpdated = movieService.updateMovie(movieUpdateRequest, movieId);
         return ResponseEntity.ok(movieUpdated);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/showtimes/{movieId}")
+    public ResponseEntity<?> addShowtime(@PathVariable Long movieId, @RequestBody ShowTimeRequest request)
+            throws MovieNotFound {
+        return ResponseEntity.ok(movieService.addShowtime(movieId, request));
+    }
+
+    @GetMapping("/showtimes/{movieId}")
+    public ResponseEntity<?> getShowtimes(@PathVariable Long movieId) throws MovieNotFound {
+        return ResponseEntity.ok(movieService.getShowtimes(movieId));
     }
 }

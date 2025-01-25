@@ -1,5 +1,6 @@
 package com.movieReservationSystem.Movies.Entities;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.Entity;
@@ -26,6 +27,8 @@ public class ShowTimeEntity {
     @ManyToOne
     @JoinColumn(name = "movie_id", nullable = false)
     private MovieEntity movie;
+
+    private LocalDate date;
 
     private LocalDateTime startTime;
 

@@ -7,9 +7,11 @@ import org.springframework.stereotype.Service;
 
 import com.movieReservationSystem.Movies.Dtos.Request.MovieAddRequest;
 import com.movieReservationSystem.Movies.Dtos.Request.MovieUpdateRequest;
+import com.movieReservationSystem.Movies.Dtos.Request.ShowTimeRequest;
 import com.movieReservationSystem.Movies.Dtos.Response.MovieAdded;
 import com.movieReservationSystem.Movies.Dtos.Response.MovieDeleted;
 import com.movieReservationSystem.Movies.Dtos.Response.MovieUpdated;
+import com.movieReservationSystem.Movies.Dtos.Response.ShowTimeResponse;
 import com.movieReservationSystem.Movies.Entities.MovieEntity;
 import com.movieReservationSystem.Movies.Entities.ShowTimeEntity;
 import com.movieReservationSystem.Movies.Exceptions.MovieNotFound;
@@ -71,7 +73,7 @@ public class MovieService {
                 movieRepository.delete(movie);
                 if (movieRepository.existsById(movieId)) {
                         throw new RuntimeException("Movie with id " + movieId + " not deleted");
-                }else {
+                } else {
                         return movieDeleted;
                 }
         }
@@ -100,5 +102,47 @@ public class MovieService {
                                 .message(message)
                                 .build();
                 return movieUpdated;
+        }
+
+        public List<ShowTimeResponse> getShowtimes(Long movieId) throws MovieNotFound {
+                MovieEntity movie = movieRepository.findById(movieId)
+                                .orElseThrow(() -> new MovieNotFound("Movie with id " + movieId + " not found"));
+                List<ShowTimeEntity> showTimes = movie.getShowTimes();
+                List<ShowTimeResponse> showTimeResponses = showTimes.stream().map(showTime -> {
+                        return ShowTimeResponse.builder()
+                                        .date(showTime.getDate())
+                                        .startTime(showTime.getStartTime())
+                                        .endTime(showTime.getEndTime())
+                                        .movieName(movie.getTitle())
+                                        .message("Showtime for movie titled '" + movie.getTitle() + "' on "
+                                                        + showTime.getDate() + " from " + showTime.getStartTime()
+                                                        + " to "
+                                                        + showTime.getEndTime())
+                                        .build();
+                }).toList();
+                return showTimeResponses;
+        }
+
+        public ShowTimeResponse addShowtime(Long movieId, ShowTimeRequest request) throws MovieNotFound {
+                MovieEntity movie = movieRepository.findById(movieId)
+                                .orElseThrow(() -> new MovieNotFound("Movie with id " + movieId + " not found"));
+                ShowTimeEntity showTime = ShowTimeEntity.builder()
+                                .movie(movie)
+                                .date(request.getDate())
+                                .startTime(request.getStartTime())
+                                .endTime(request.getEndTime())
+                                .build();
+                showTimeRepository.save(showTime);
+                movie.getShowTimes().add(showTime);
+                movieRepository.save(movie);
+                return ShowTimeResponse.builder()
+                                .date(showTime.getDate())
+                                .startTime(showTime.getStartTime())
+                                .endTime(showTime.getEndTime())
+                                .movieName(movie.getTitle())
+                                .message("Showtime for movie titled '" + movie.getTitle() + "' on "
+                                                + showTime.getDate() + " from " + showTime.getStartTime() + " to "
+                                                + showTime.getEndTime())
+                                .build();
         }
 }
